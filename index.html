@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<title>Analisi Device</title>
+
+<style>
+    body {
+        margin: 0;
+        background: #0a0f0a;
+        font-family: "Segoe UI", Arial, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        color: #d4f5d4;
+    }
+
+    /* FRAME */
+    .frame {
+        width: 50vw;
+        height: 30vh;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 3vmin;
+        background: #101810;
+        border-radius: 12px;
+        border: 1px solid #1f3f1f;
+        box-shadow: 0 0 30px rgba(0, 255, 100, 0.08);
+    }
+
+    .title {
+        font-size: clamp(20px, 3.5vmin, 56px);
+        margin-bottom: 20px;
+        color: #b7f0b7;
+    }
+
+    .terminal {
+        font-family: "Courier New", monospace;
+        font-size: clamp(16px, 3vmin, 48px);
+        margin-bottom: 25px;
+        color: #8cff8c;
+    }
+
+    .cursor {
+        animation: blink 1s infinite;
+    }
+
+    @keyframes blink {
+        50% { opacity: 0; }
+    }
+
+    /* PROGRESS */
+    .progress-container {
+        background: #182418;
+        border-radius: 8px;
+        height: clamp(28px, 5vmin, 72px);
+        overflow: hidden;
+        border: 1px solid #244d24;
+    }
+
+    .progress-bar {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(90deg, #1f8f1f, #4cff4c);
+        position: relative;
+        transition: width 0.1s linear;
+    }
+
+    .percent {
+        position: absolute;
+        right: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: clamp(13px, 2.2vmin, 32px);
+        color: #021f02;
+        font-weight: bold;
+    }
+
+    /* POPUP */
+    #popup {
+        position: fixed;
+        inset: 0;
+        display: none;
+        justify-content: center;
+        align-items: center;
+        background: rgba(0, 20, 0, 0.95);
+    }
+
+    .popup-box {
+        background: #0f1f0f;
+        border-radius: 12px;
+        padding: 30px 40px;
+        text-align: center;
+        border: 1px solid #2e6e2e;
+        box-shadow: 0 0 40px rgba(0, 255, 100, 0.15);
+        animation: popupAnim 0.4s ease;
+    }
+
+    @keyframes popupAnim {
+        from {
+            transform: scale(0.9);
+            opacity: 0;
+        }
+        to {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+
+    .popup-title {
+        font-size: 22px;
+        margin-bottom: 10px;
+        color: #8cff8c;
+        font-weight: bold;
+    }
+
+    #popup.error {
+        background: rgba(35, 0, 0, 0.95);
+    }
+
+    .popup-box.error {
+        background: #1f0f0f;
+        border-color: #8f2e2e;
+        box-shadow: 0 0 40px rgba(255, 60, 60, 0.2);
+    }
+
+    .popup-title.error {
+        color: #ff4d4d;
+    }
+
+    .popup-sub {
+        font-size: 14px;
+        color: #a8d5a8;
+    }
+</style>
+</head>
+
+<body>
+
+<div class="frame">
+
+    <div class="title">Collegato al Device</div>
+
+    <div class="terminal">
+        &gt; <span id="text"></span><span class="cursor">_</span>
+    </div>
+
+    <div class="progress-container">
+        <div class="progress-bar" id="bar">
+            <span class="percent" id="percent">0%</span>
+        </div>
+    </div>
+
+</div>
+
+<!-- POPUP -->
+<div id="popup">
+    <div class="popup-box" id="popupBox">
+        <div class="popup-sub" id="popupSub">✔ Analisi completata</div>
+        <div class="popup-title" id="popupTitle"></div>
+    </div>
+</div>
+
+<script>
+/* TYPE EFFECT */
+const text = "Analisi in corso";
+let i = 0;
+
+function typeWriter() {
+    if (i < text.length) {
+        document.getElementById("text").innerHTML += text.charAt(i);
+        i++;
+        setTimeout(typeWriter, 80);
+    }
+}
+typeWriter();
+
+
+/* PROGRESS 10s */
+let progress = 0;
+const bar = document.getElementById("bar");
+const percent = document.getElementById("percent");
+
+const interval = setInterval(() => {
+    progress++;
+    bar.style.width = progress + "%";
+    percent.innerHTML = progress + "%";
+
+    if (progress >= 100) {
+        clearInterval(interval);
+        showPopup();
+    }
+}, 100);
+
+
+/* PARAMETRO SerialNumber (es. index.html?SerialNumber=050524) */
+const params = new URLSearchParams(window.location.search);
+const serialNumber = params.get("SerialNumber");
+const VALID_SERIAL = "050524";
+
+/* POPUP */
+function showPopup() {
+    const title = document.getElementById("popupTitle");
+    const box = document.getElementById("popupBox");
+    const sub = document.getElementById("popupSub");
+    const popup = document.getElementById("popup");
+
+    if (serialNumber === VALID_SERIAL) {
+        title.textContent = "Device Corretto";
+        sub.textContent = "✔ Analisi completata";
+        title.classList.remove("error");
+        box.classList.remove("error");
+        popup.classList.remove("error");
+    } else {
+        title.textContent = "Device Errato";
+        sub.textContent = "✖ Analisi completata";
+        title.classList.add("error");
+        box.classList.add("error");
+        popup.classList.add("error");
+    }
+    popup.style.display = "flex";
+}
+</script>
+
+</body>
+</html>
